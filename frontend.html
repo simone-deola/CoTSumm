@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summarization Page</title>
+</head>
+<style>
+  .grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr ;
+    grid-template-rows: 1fr 1fr ;
+  }
+  .fixed-div {
+    width: 900px; /* Set the width of the first div */
+    height: 350px; /* Set the height of the first div */
+  }
+  .flex-container {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .flex-item {
+    flex: 1;
+    min-width: 48%; /* Set the width of each column */
+    margin: 1%; /* Add some margin between the columns */
+  }
+</style>
+<body>
+<div class="flex-container">
+        <div class="grid-container">
+            <div class="fixed-div">
+                <label for="inputText">Enter Text:</label>
+                <textarea id="inputText" rows="20" cols="150"></textarea>
+                <button onclick="summarizeText()">Summarize</button>
+            </div>
+            <div class="flex-item">
+
+            </div>
+            <div class="flex-item">
+                <h2>Response:</h2>
+                <div id="responseBox"></div>
+            </div >
+            <div class="flex-item">
+                <h2>AdditionalInfo:</h2>
+                <div id="additionalInfoBox"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        function summarizeText() {
+            var inputText = document.getElementById("inputText").value;
+
+            var raw = JSON.stringify({
+              "text": inputText
+            });
+
+            fetch("http://0.0.0.0:8080/summarize",
+            {
+              mode: 'cors',
+              method: 'POST',
+              headers: {"Content-Type" : "application/json" ,
+                        "Access-Control-Allow-Origin" : "*",
+                        "Access-Control-Allow-Methods" : "GET,POST,OPTIONS,DELETE,PUT"},
+              body: raw,
+              redirect: 'follow'
+            }
+            )
+            .then(response => response.json())
+            .then(data => {
+                var responseBox = document.getElementById("responseBox");
+                responseBox.innerHTML = data.summary;
+                var additionalInfoBox = document.getElementById("additionalInfoBox");
+                var HTML = "<table border=1 width=100%>";
+                for(j=0;j<data.additional_information.length;j++)
+                {
+                    HTML += "<tr><td align=center>"+data.additional_information[j]+"</td></tr>";
+                }
+                HTML += "</table>";
+                additionalInfoBox.innerHTML = HTML;
+
+
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+
+</html>
+
+
+
+
